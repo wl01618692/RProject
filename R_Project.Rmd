@@ -1,0 +1,326 @@
+---
+title: "R Project"
+author: "Chia-Yuan Chang"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## Q1 Vector Calculation
+
+
+### (a) Calculate standard deviation of specific vector
+We take in vector with the dataset 1:100 and for each element in the vector we subtract that element from the mean of the dataset and divides by one standard deviation. Then we returns the standard deviation of the result.
+```{r}
+#Q1 (a)
+OutputVector.Sd = function(InputVector){
+  InputVector.mean = mean(InputVector)
+  InputVector.sd = sd(InputVector)
+
+  Y = (InputVector-InputVector.mean)/InputVector.sd
+  return(sd(Y))
+}
+
+X = 1:100
+OutputVector.Sd(X)
+
+```
+
+We see that the standard deviation of resulted vector is 1, and the mean and standard deviation of the original dataset is 50.5 and 29.01149 respectively.
+
+### (b) Calculate two sample standard deviation away from the mean
+We take in vector with the dataset 1:100 and calculate the mean and sample standard deviation of it. We then calculate the values of two sample standard deviation away from the mean.
+```{r}
+#Q1 (b)
+OutputVector.Sd = function(InputVector){
+  InputVector.mean = mean(X)
+  InputVector.sd = sd(X)
+  LowerBound = InputVector.mean - 2 * InputVector.sd
+  UpperBound = InputVector.mean + 2 * InputVector.sd
+  ResultVector=c(LowerBound,UpperBound)
+  return(ResultVector) 
+}
+
+X = 1:100
+OutputVector.Sd(X)
+
+```
+We know that the mean and standard deviation of the dataset is 50.5 and 29.01149 from (a). We see that the interval of two sample standard deviation away from the sample mean is (-7.522984, 108.523).
+
+### (c) Remove outliers
+We take in a vector and calculate the mean after removing any observations that are more than 3standard deviations from the mean. We use a while loop to iterate the vector and check if each element in the vector is within the bounds. We also display the vector after removal of the outliers.
+```{r}
+#Q1 (c)
+OutputVector.Sd = function(InputVector){
+  InputVector.mean = mean(InputVector)
+  InputVector.sd = sd(InputVector)
+  InputVector.UpperOutlierBound = InputVector.mean + 3 * InputVector.sd
+  InputVector.LowerOutlierBound = InputVector.mean - 3 * InputVector.sd 
+  InputVector.length = length(InputVector);
+
+  int_count = 1;
+  while (int_count != InputVector.length) {
+    if (InputVector[int_count] > InputVector.UpperOutlierBound | InputVector[int_count] < InputVector.LowerOutlierBound) {
+      InputVector = InputVector[-int_count];
+    }
+    if (InputVector[int_count] > InputVector.UpperOutlierBound) {
+      InputVector = InputVector[-int_count];
+    }
+    int_count = int_count + 1;
+  }
+  return(InputVector)
+}
+
+X = c(1:100,200,300)
+X
+OutputVector.Sd(X)
+
+```
+We see that the value of more than 3 standard deviations from the mean is 176.168 and the value of less than 3 standard deviations from the mean is -67.34446. We remove 200 and 300 since they are outliers.
+
+## Q2 Fair Coin Flip Simulation
+We simluate the experiment of a fair coin flip to see how many flips it takes for the probability of a head to be approximately 0.50.
+
+### (a) Flip coin for one trial
+We use the function sample to flip a fair coin 20 times, and find the probability that you flipped a head based on the 20 flips.
+```{r}
+#Q2 (a)
+many.rolls = sample(c("H","T"), 20, replace = TRUE)
+sum(many.rolls == "H")
+prob.H = sum(many.rolls == "H") / length(many.rolls)
+prob.H
+
+```
+We see that the number of our rolls is 20 and the number of head we get is displayed. We then calculate the probability by dividing number of head by 20. We see that the probability of getting head changes everytime we run the code.
+
+### (b) Flip coin for large nunber of trials
+Now we use a sapply function to repeat (a) for the following values of n = {10,100,1000,10000,100000}. We then display the probabilities for all 5 values of n. We do this by creating a vector that stores n and a function that call sapply for all the elements inside that vector.
+```{r}
+#Q2 (b)
+all.n = c(10, 100, 1000, 10000, 100000)
+
+many.rolls = sapply(all.n,function(n){
+  many.rolls = sample(c("H","T"), 20, replace = TRUE)
+  length(many.rolls)
+  sum(many.rolls == "H")
+  prob.H = sum(many.rolls == "H") / length(many.rolls)
+})
+
+many.rolls
+
+```
+We see that the probability of getting head changes everytime we run the code. However, for small value of n the change in the probability of getting a head varies the most and the large value if n the change in the probability of getting a head varies the least.
+
+### (c) Error estimation
+The error of a coin flip is the absolute value of the estimated probability minus the true probability. We know the true probability of getting a head is always 0.5, assuming a fair coin. We will find the error for my simulations from (c) by using this value.
+```{r}
+#Q2 (c)
+simluation.error = abs(many.rolls - 0.5)
+simluation.error
+
+```
+We see that the result of this error is dependent on the result we get from (b), which varies everytime we run the code.
+
+### (d) Error observation
+We see that the error decreases and tends to converge to 0 as n increases. By the law of large number, as n increases the probability of getting a head should converge to 0.5, even though it may not be exactly at 0.5, and the error should gets smaller.
+
+
+## Q3 Ordering Problem
+### (a) Single ordering
+In this question we want to find all possible orderings of 7 objects, and probabilities associated with them. We use sample to draw from values 7 times without replacement and return this vector.
+```{r}
+#Q3 (a)
+values = as.character(1:7)
+single.draw = sample(values, 7, replace = FALSE)
+single.draw
+
+```
+We see that this vector is of size 7 with a permutation of the seven object.
+
+### (b) Repeat for 100000 times
+We repeat (a) 100000 times using a sapply function. The result has 7 rows and 100000 columns, where each column is a specific random draw. We use this result to find how many of the orderings begin with the character 1.
+```{r}
+#Q3 (b)
+many.draws = sapply(1:100000,function(i){
+  single.draw = sample(values, 7, replace = FALSE)
+})
+sum(many.draws[1,] == "1")
+
+```
+
+### (c) Find number of specific ordering
+We use my samples from (b) to find the probability that a random ordering started with a 3 and ended with a 7. We use the same function sum() with and operator to achieve that.
+```{r}
+#Q3 (c)
+sum(many.draws[1,] == "3" & many.draws[7,] == "7")
+
+```
+
+### (d) Find number of unique ordering
+We modify the above code with paste function and use it with a sapply function to find how many unique orderings of 7 values there are.
+```{r}
+#Q3 (d)
+all.orders = sapply(1:100000,function(i){
+  paste(many.draws[,i],collapse = "") #For the ith column, collapse the vector into one character
+})
+length(unique(all.orders))
+
+```
+
+## Q4 Binomial Random Variable Simulation
+### (a) Calculate probability
+We consider a class with 40 students,and the probability that a student does not turn in a homework is 0.05, which is considered a success. Assume all students are independent of all other students and the probability does not change.
+```{r}
+#Q4 (a)
+single.run = sample(c("success","fail"), 40, replace = TRUE, prob = c(0.05, 0.95))
+sum(single.run == "success")
+
+```
+
+### (b) Plot histogram
+We repeat (a) 1000000 times and plot a histogram of the result.
+```{r}
+#Q4 (b)
+many.run = sapply(1:1000000,function(i){
+  single.run = sample(c("success","fail"), 40, replace = TRUE, prob = c(0.05, 0.95))
+  sum(single.run == "success")
+})
+hist(many.run, main = "Number of success", xlab = "Number of students not turn in a homework")
+
+```
+
+This histogram seems to be left skewed and symmetric.
+
+### (c) Calculate mean and standard deviation of success
+We find the average of the number of successes in 40 trials and the standard deviation based on simulation from (b). The value displayed first is the mean and the second value displayed is the standard deviation.
+```{r}
+#Q4 (c)
+the.mean = round( mean(many.run), digits = 4 )
+the.mean
+the.sd = round( sd(many.run), digits = 4 )
+the.sd
+
+```
+
+### (d) Calculate probability part 1
+We estimate the probability that all students turned in their homework based on the simulation from (b).
+```{r}
+#Q4 (d)
+prob.d = round( mean(many.run == 0), digits = 4 )
+prob.d
+
+```
+
+### (e) Calculate probability part 2
+We estimate the probability that at least two students did not turn in their homework based on the simulation from (b).
+```{r}
+#Q4 (e)
+prob.e = round( sum(many.run > 1) / length(many.run), digits = 4 )
+prob.e
+
+```
+
+### (f) Calculate median number
+We calculate the median number of students who will forget their homework based on the simulation from (b).
+```{r}
+#Q4 (f)
+round( median(many.run), digits = 2)
+
+```
+
+## Q5 Linear Regression for Crime Rate
+### (a) Plot a scatter plot
+Consider Y to be crime rate, and X to be percentage with high school diploma. We plot a scatter plot of Y and X.
+```{r}
+#Q5 (a)
+data1 = read.csv("crime.csv") # ?read.csv
+head(data1)
+plot(data1$dip, data1$rate, xlab = "Percentage with high school diploma", ylab = "Crime rate",
+     main = "Scatter Plot high school diploma against crime rate")
+
+```
+
+The variable percentage with high school diploma and crime rate seem to have a linear relationship from this scatter plot.
+
+### (b) Calculate the estimated regression line
+The linear regression line is $$\hat{y}_i = \hat{\beta}_0 + \hat{\beta}_1x_i$$ where
+$\hat{\beta}_1 = r\frac{s_y}{s_x}, \hat{\beta}_0 = \bar{Y} - \hat{\beta}_1 \bar{X}$.
+
+We calculate the estimated regression line. We first compute betahat1 and betahat0 for the estimated regression line and then output the summary of the line. We also plot the regression line on the scatter plot.
+```{r}
+#Q5 (b)
+r = cor(data1$dip, data1$rate) # correlation
+sdx = sd(data1$dip) # standard deviation
+sdy = sd(data1$rate)
+
+betahat1 = r*sdy/sdx
+betahat0 = mean(data1$rate) - betahat1*mean(data1$rate)
+
+lm1 = lm(rate~dip, data = data1)
+summary(lm1)
+
+plot(data1$dip, data1$rate, xlab = "Percentage with high school diploma", ylab = "Crime rate",
+     main = "Scatter Plot high school diploma against crime rate")
+abline(lm1, col = "blue")
+```
+
+The estimated regression line is $\hat{Y} =$`r lm1$coef[2]` $X$ + `r lm1$coef[1]`.
+
+### (c) Interpret estimated slope and intercept
+We see that when the percentage of high school diploma is 0, the estimated crime rate based on this dataset is 20517.60 and
+the slope of the estimated line is -170.58, meaning that for one percent increase of people with high school diploma, the estimated crime rate will decrease by 170.58. This interpretation makes sense because by common sense the crime rate should decrease as the literacy rate increases.
+
+### (d) Outliers
+The blue line is our regression line, and it goes through the centers of our data cluster. From the scatter plot, we can observe some outliers which are vertically far from the regression line.
+
+```{r}
+#Q5 (d)
+colvec = 1:84 %in% c(27,37,48)
+plot(data1$dip, data1$rate, xlab = "Percentage with high school diploma", ylab = "Crime rate",
+     main = "Scatter plot high school diploma against crime rate", col = colvec+1)
+abline(lm1, col = "blue")
+#data1[c(27,37,48),]
+
+```
+
+We see that there are three outliers colored in red in the scatter plot. Those points are in the 27th, 37th, and 48th row of the dataset. Those points are also marked in the QQ plot and residual plot.
+
+### (e) Normal Probability plot (QQ plot)
+We create a QQ plot (normal probability plot) of the residuals.
+
+```{r}
+#Q5 (e)
+plot(lm1, which=2) # Another way
+
+```
+
+The points seem to fall about a straight line, and thus we can say errors follow a normal distribution.
+
+### (f) Residual Plots
+We first create a residual plot.
+
+```{r}
+#Q5 (f)
+plot(lm1$fitted.values, lm1$residuals)
+abline(h = 0, col = "blue")
+plot(lm1, which=1) # Another way
+
+```
+
+We see that the residuals are equally spread around the line 0, the assumption of constant variance of errors seems to be satisfied.
+ 
+### (g) Confidence Interval
+We find the 95% confidence interval for the slope.
+```{r}
+#Q5 (g)
+confint(lm1, 'dip', level=0.95)
+
+```
+Based on the calculation, I'm 95\% confident that the true mean slope is between -253.2798 and -87.87061. This interval suggests there is a significant linear relationship because the interval does not include zero.
+
+## Appendix Code
+```{r, ref.label=knitr::all_labels(),echo=TRUE,eval=FALSE}
+```
