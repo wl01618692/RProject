@@ -2,8 +2,7 @@
 title: "R Project"
 author: "Chia-Yuan Chang"
 date: "`r Sys.Date()`"
-output:
-  github_document:
+output: html_document
 ---
 
 ```{r setup, include=FALSE}
