@@ -1,6 +1,6 @@
 ---
 title: "R Project"
-author: "Chia-Yuan Chang"
+author: ""
 date: "`r Sys.Date()`"
 output: rmarkdown::github_document
 ---
